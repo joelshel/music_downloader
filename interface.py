@@ -29,7 +29,7 @@ def main():
     entry2.grid(row=1, column=0)
     entry3.grid(row=2, column=0)
 
-    button = tk.Button(master=root, text="CTkButton", command=dl.download)
+    button = tk.Button(master=root, text="Download", command=dl.download)
     button.grid(row=3, column=0, sticky=tk.N, pady=10)
 
     root.mainloop()
