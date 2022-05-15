@@ -16,7 +16,6 @@ def data_spotify():
     client_id = credent['client_id']
     client_secret = credent['client_secret']
     redirect_uri = credent['redirect_uri']
-    print(redirect_uri)
 
     credentials = SOA(
         client_id, client_secret, redirect_uri, scope=scope, username=username
