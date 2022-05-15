@@ -14,6 +14,9 @@ class PEntry():
         self.root.grid(**kwargs, padx=10, pady=(10, 0))
         self.label.grid(row=0, column=0)
         self.entry.grid(row=0, column=1)
+    
+    def get_value(self):
+        return self.entry.get()
   
 
 def main():
@@ -27,7 +30,8 @@ def main():
     entry1.grid(row=0, column=0)
     entry2.grid(row=1, column=0)
 
-    button = tk.Button(master=root, text="Download", command=dl.download)
+    down = lambda: dl.download(entry1.get_value(), entry2.get_value())
+    button = tk.Button(master=root, text="Download", command=down)
     button.grid(row=3, column=0, sticky=tk.N, pady=10)
 
     root.mainloop()
