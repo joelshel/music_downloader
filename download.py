@@ -14,11 +14,9 @@ def data_spotify(username, playlist_name):
     client_secret = credent['client_secret']
     redirect_uri = credent['redirect_uri']
 
-    credentials = SOA(
-        client_id, client_secret, redirect_uri, scope=scope, username=username
-        )
+    credentials = SOA(client_id, client_secret, redirect_uri, scope=scope)
     results = sp.Spotify(client_credentials_manager=credentials)
-    playlists = results.current_user_playlists()
+    playlists = results.user_playlists(username)
     
     playlist_dict = {}
     
