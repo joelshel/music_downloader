@@ -22,12 +22,10 @@ def main():
     # root_tk.geometry("400x240")
     
     entry1 = PEntry(root, "username:")
-    entry2 = PEntry(root, "password:")
-    entry3 = PEntry(root, "playlist:")
+    entry2 = PEntry(root, "playlist:")
 
     entry1.grid(row=0, column=0)
     entry2.grid(row=1, column=0)
-    entry3.grid(row=2, column=0)
 
     button = tk.Button(master=root, text="Download", command=dl.download)
     button.grid(row=3, column=0, sticky=tk.N, pady=10)
