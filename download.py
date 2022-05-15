@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
 import json
+from multiprocessing import Pool
+import re
+import requests as r
 import spotipy as sp
 from spotipy.oauth2 import SpotifyOAuth as SOA
 
 
-def data_spotify(username, playlist_name):
+def get_spotify_data(username, playlist_name):
     with open("credentials.json", "r") as f:
         credent = json.load(f)
     
@@ -59,8 +62,26 @@ def data_spotify(username, playlist_name):
     return music_dict
 
 
+def get_data_youtube(music_data):
+    yt_search_url="https://www.youtube.com/results?"
+    i = music_data[0]
+    music = music_data[1][0]
+    artists = music_data[1][1]
+    
+    search_term = music + " " + " ".join(artists)
+    params= {"search_query": search_term}
+    result = r.get(yt_search_url, params)
+    
+    # regex to match /watch?v= and any 11 caracters after that
+    path = re.search("/watch\?v=.{11}", result.text).group()
+    return path
+
+
 def download(username, playlist):
-    data_spotify(username, playlist)
+    spotify_data = get_spotify_data(username, playlist)
+    pool = Pool(50)
+    paths = list(pool.map(get_data_youtube, spotify_data.items()))
+
 
 if __name__ == '__main__':
-    download()
+    download("your", "Minha playlist")
