@@ -118,7 +118,6 @@ def create_m3u(playlist_path):
     
     music_names = [f"./{playlist}/{music_name}\n" for music_name in music_names]
     
-    print(path + "/" + playlist)
     with open(path + "/" + playlist + ".m3u", "w") as m3u:
         m3u.writelines(music_names)
 
