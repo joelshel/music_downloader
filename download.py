@@ -5,7 +5,7 @@ import http
 import json
 from multiprocessing import Pool
 from os.path import isdir, expanduser, join
-from os import mkdir
+from os import listdir, mkdir
 import re
 import requests as r
 import spotipy as sp
@@ -110,6 +110,19 @@ def download_music(path, playlist, destination="~/Music/", count=0):
         download_music(path, playlist, destination, count+1)
 
 
+def create_m3u(playlist_path):
+    music_names = listdir(playlist_path)
+    
+    playlist_path = playlist_path.split("/")
+    path, playlist = "/".join(playlist_path[:-2]), playlist_path[-2]
+    
+    music_names = [f"./{playlist}/{music_name}\n" for music_name in music_names]
+    
+    print(path + "/" + playlist)
+    with open(path + "/" + playlist + ".m3u", "w") as m3u:
+        m3u.writelines(music_names)
+
+
 def download(username, playlist, destination="~/Music/"):
     spotify_data = get_spotify_data(username, playlist)
 
@@ -125,6 +138,8 @@ def download(username, playlist, destination="~/Music/"):
     
     with Pool(10) as p:
         p.map(partial(download_music, destination=destination, playlist=playlist), paths)
+    
+    create_m3u(destination)
 
     return paths
 
