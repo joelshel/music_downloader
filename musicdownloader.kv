@@ -1,0 +1,29 @@
+#:kivy 2.1.0
+#:import dl download
+
+
+<LabelInput>:
+    Label:
+        text: root.label_text
+        font_size: 20
+    TextInput:
+        id: text_input
+        font_size: 20
+        text: root.input_text
+        on_text: root.alter_input_text()
+    
+
+<Interface>:
+    orientation: 'vertical'
+    LabelInput:
+        id: username
+        label_text: 'username:'
+        text: self.input_text
+    LabelInput:
+        id: playlist
+        label_text: 'playlist:'
+        text: self.input_text
+    Button:
+        text: 'download'
+        font_size: 20
+        on_release: dl.download(username.text, playlist.text)
