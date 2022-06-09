@@ -6,6 +6,7 @@ from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.properties import StringProperty
+from kivy.config import Config
 
 kivy.require("2.1.0")
 
@@ -24,6 +25,10 @@ class Interface(BoxLayout):
 class MusicDownloaderApp(App):
 
     def build(self):
+        Config.set('graphics', 'width', '500')
+        Config.set('graphics', 'height', '150')
+        Config.set('graphics', 'resizable', False)
+
         return Interface()
 
 
