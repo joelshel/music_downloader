@@ -9,7 +9,7 @@ from os import listdir, mkdir
 import re
 import requests as r
 import spotipy as sp
-from spotipy.oauth2 import SpotifyOAuth as SOA
+from spotipy.oauth2 import SpotifyClientCredentials as SCC
 import youtube_dl
 
 
@@ -25,7 +25,7 @@ def get_spotify_data(username, playlist_name):
     client_secret = credent['client_secret']
     redirect_uri = credent['redirect_uri']
 
-    credentials = SOA(client_id, client_secret, redirect_uri, scope=scope)
+    credentials = SCC(client_id, client_secret)
     results = sp.Spotify(client_credentials_manager=credentials)
     playlists = results.user_playlists(username)
     
