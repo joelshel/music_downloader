@@ -10,10 +10,16 @@ import re
 import requests as r
 import spotipy as sp
 from spotipy.oauth2 import SpotifyClientCredentials as SCC
+from spotipy.client import SpotifyException
 import youtube_dl
 
 
 COOKIES = "cookies.txt"
+
+
+def wtaf(file, text):
+    with open(file, 'w') as f:
+        f.write(text)
 
 
 def get_spotify_data(username, playlist_name):
@@ -27,8 +33,12 @@ def get_spotify_data(username, playlist_name):
 
     credentials = SCC(client_id, client_secret)
     results = sp.Spotify(client_credentials_manager=credentials)
-    playlists = results.user_playlists(username)
-    
+
+    try:
+        playlists = results.user_playlists(username)
+    except SpotifyException:
+        return 1
+
     playlist_dict = {}
     
     while playlists:
@@ -39,10 +49,10 @@ def get_spotify_data(username, playlist_name):
         else:
             break
 
-    try:
-        playlist_id = playlist_dict[playlist_name]
-    except KeyError:
-        return "Playlist name not found in your playlists"
+    if playlist_name not in playlist_dict:
+        return 2
+
+    playlist_id = playlist_dict[playlist_name]
 
     musics = results.playlist(playlist_id)
     music_dict = {}
@@ -124,6 +134,16 @@ def create_m3u(playlist_path):
 
 def download(username, playlist, destination="~/Music/"):
     spotify_data = get_spotify_data(username, playlist)
+
+    error = None
+    if spotify_data == 1:
+        error = "Username not found"
+    elif spotify_data == 2:
+        error = "Playlist not found"
+
+    if error:
+        wtaf("error.txt", error)
+        return error
 
     with Pool(50) as p:
         paths = list(p.map(get_music_path, spotify_data.items()))

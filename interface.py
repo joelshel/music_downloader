@@ -2,11 +2,12 @@
 
 import kivy
 from kivy.app import App
-from kivy.uix.button import Button
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.properties import StringProperty
 from kivy.config import Config
+from kivy.properties import StringProperty
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.popup import Popup
+import download as dl
 
 kivy.require("2.1.0")
 
@@ -20,6 +21,30 @@ class LabelInput(BoxLayout):
 
 class Interface(BoxLayout):
     pass
+
+
+class PopupWidget(BoxLayout):
+    
+    def get_error_text(self):
+        with open('error.txt', 'r') as f:
+            return f.read()
+
+
+class ErrorPopup(Popup):
+    pass
+
+
+class DownloadButton(Button):
+
+    def throw_popup(self):
+        popup = ErrorPopup()
+        popup.open()
+
+
+    def download(self, username, playlist):
+        has_error = dl.download(username, playlist)
+        if type(has_error) == str:
+            self.throw_popup()
 
 
 class MusicDownloaderApp(App):

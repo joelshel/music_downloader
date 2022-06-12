@@ -1,30 +1,64 @@
 #:kivy 2.1.0
 
-#:import dl download
 #:import hex kivy.utils.get_color_from_hex
 
-#:set text_color '#B2F6FF'
+#:set letter_size 20
+#:set text_color hex('#B2F6FF')
+#:set bg_color hex('#023535')
 
 <LabelInput>:
     Label:
         text: root.label_text
-        font_size: 20
+        font_size: letter_size
         size_hint: None, None
         size: 150, 37
         pos_hint: {'center_y': 0.5}
-        color: hex(text_color)
+        color: text_color
     TextInput:
         id: text_input
         multiline: False
         text: root.input_text
         on_text: root.alter_input_text()
-        font_size: 20
+        font_size: letter_size
         size_hint: None, None
         size: 320, 37
         pos_hint: {'center_y': 0.5}
-        background_color: hex(text_color)
+        background_color: text_color
         foreground_color: hex('#015958')
         selection_color: hex('#0FC2C077')
+
+<PopupWidget>:
+    orientation: 'vertical'
+    canvas:
+        Color:
+            rgb: bg_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    Label:
+        id: label
+        text: root.get_error_text()
+        font_size: letter_size
+        color: text_color
+
+    Button:
+        text: 'Close'
+        font_size: letter_size
+        size_hint: None, None
+        size: 180, 37
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+        color: text_color
+        background_color: hex('#008F8C')
+        on_release: app.root.popupreference.dismiss()
+
+<ErrorPopup>:
+    background: ''
+    background_color: bg_color
+    title: 'Error'
+    title_color: text_color
+    title_size: letter_size
+    on_open: app.root.popupreference=self
+    PopupWidget:
 
 <Interface>:
     padding: 5
@@ -32,7 +66,7 @@
     orientation: 'vertical'
     canvas.before:
         Color:
-            rgb: hex('#023535')
+            rgb: bg_color
         Rectangle:
             pos: self.pos
             size: self.size
@@ -44,12 +78,12 @@
         id: playlist
         label_text: 'playlist:'
         text: self.input_text
-    Button:
+    DownloadButton:
         text: 'download'
-        font_size: 20
+        font_size: letter_size
         size_hint: None, None
         size: 180, 37
         pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-        color: hex(text_color)
+        color: text_color
         background_color: hex('#008F8C')
-        on_release: dl.download(username.text, playlist.text)
+        on_release: self.download(username.text, playlist.text)
