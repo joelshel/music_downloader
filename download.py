@@ -4,32 +4,31 @@ from functools import partial
 import http
 import json
 from multiprocessing import Pool
-from os.path import isdir, expanduser, join
-from os import listdir, mkdir
+from os.path import isdir, isfile, expanduser
+from os import listdir, mkdir, remove
 import re
 import requests as r
 import spotipy as sp
 from spotipy.oauth2 import SpotifyClientCredentials as SCC
 from spotipy.client import SpotifyException
-import youtube_dl
+import yt_dlp
 
 
 COOKIES = "cookies.txt"
 
-
-def wtaf(file, text):
-    with open(file, 'w') as f:
-        f.write(text)
-
+#* SpotifyOAuth can be used but need to be imported +
+#* redirect_uri is needed, you should set a scope and
+#* there's need to have some user interaction but
+#* you get access to things like private playlists
 
 def get_spotify_data(username, playlist_name):
     with open("credentials.json", "r") as f:
         credent = json.load(f)
     
-    scope = 'playlist-read-private'
+    # scope = 'playlist-read-private'
     client_id = credent['client_id']
     client_secret = credent['client_secret']
-    redirect_uri = credent['redirect_uri']
+    # redirect_uri = credent['redirect_uri']
 
     credentials = SCC(client_id, client_secret)
     results = sp.Spotify(client_credentials_manager=credentials)
@@ -87,37 +86,39 @@ def get_music_path(music_data):
     artists = music_data[1][1]
     
     search_term = music + " " + " ".join(artists)
-    params= {"search_query": search_term}
+    params = {"search_query": search_term}
     result = r.get(yt_search_url, params)
     
-    # regex to match /watch?v= and any 11 caracters after that
+    #* regex to match /watch?v= and any 11 caracters after that
     path = re.search("/watch\?v=.{11}", result.text).group()
     return path
 
 
-def download_music(path, playlist, destination="~/Music/", count=0):
+def download_music(path, playlist, destination=f"{expanduser('~')}/Music/", count=0):
     yt_url="https://www.youtube.com"
     
     ydl_opts = {
         'cookiefile': COOKIES,
-        'format': 'bestaudio/best',
+        'format': 'm4a/bestaudio/best',
         'outtmpl': f'{destination}%(title)s.%(ext)s',
-        'download_archive': f'downloaded_songs_{playlist}.txt',
+        'download_archive': f'{destination}downloaded_songs_{playlist}.txt',
         'cachedir': False,
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }]
     }
 
     try:
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([yt_url + path])
-    except (youtube_dl.utils.DownloadError, http.cookiejar.LoadError):
-        if count >= 3:
-            return
-        download_music(path, playlist, destination, count+1)
+    except http.cookiejar.LoadError:
+        if isfile(COOKIES):
+            remove(COOKIES)
+    except yt_dlp.utils.DownloadError:
+        pass
+    else:
+        return
+    
+    if count >= 3:
+        return
+    download_music(path, playlist, destination, count+1)
 
 
 def create_m3u(playlist_path):
@@ -132,36 +133,34 @@ def create_m3u(playlist_path):
         m3u.writelines(music_names)
 
 
-def download(username, playlist, destination="~/Music/"):
+def get_music_paths(username, playlist):
     spotify_data = get_spotify_data(username, playlist)
 
-    error = None
     if spotify_data == 1:
-        error = "Username not found"
+        return "Username not found"
     elif spotify_data == 2:
-        error = "Playlist not found"
-
-    if error:
-        wtaf("error.txt", error)
-        return error
+        return "Playlist not found"
 
     with Pool(50) as p:
         paths = list(p.map(get_music_path, spotify_data.items()))
 
+    return paths
+
+
+def download(paths, playlist, destination=f"{expanduser('~')}/Music/"):
     destination += playlist + "/"
-    destination = destination.split("/")
-    destination = join(expanduser(destination[0]), "/".join(destination[1:]))
 
     if not isdir(destination):
         mkdir(destination)
     
     with Pool(10) as p:
-        p.map(partial(download_music, destination=destination, playlist=playlist), paths)
+        p.map(partial(download_music, playlist=playlist, destination=destination), paths)
     
     create_m3u(destination)
 
-    return paths
-
 
 if __name__ == '__main__':
-    download("fhvspad0cvvk4f3a5x5n3ikfm", "Minha playlist")
+    user = "fhvspad0cvvk4f3a5x5n3ikfm"
+    playlist = "14 min"
+    paths = get_music_paths(user, playlist)
+    download(paths, playlist)

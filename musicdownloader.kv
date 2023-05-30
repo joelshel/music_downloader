@@ -69,6 +69,8 @@ MainLayout:
     ProgressBar:
         size_hint: .8, .1
         pos_hint: {"center_x":.5}
+        max: root.max
+        value: root.value
 
 <Error>:
     auto_dismiss: False
