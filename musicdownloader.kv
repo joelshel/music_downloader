@@ -66,11 +66,20 @@ MainLayout:
         on_release:
             self.background_color = button_color;
             root.thread_download(username.text, playlist.text)
-    ProgressBar:
-        size_hint: .8, .1
-        pos_hint: {"center_x":.5}
-        max: root.max
-        value: root.value
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint_y: .25
+        ProgressBar:
+            max: root.max
+            value: root.value
+            size_hint: .8, .1
+            pos_hint: {"center_x":.5}
+        Label:
+            text: f'{root.value}/{root.max}'
+            size_hint_y: .1
+            font_size: 14
+            color: text_color
+
 
 <Error>:
     auto_dismiss: False

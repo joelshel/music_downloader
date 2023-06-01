@@ -71,7 +71,7 @@ class MusicDownloaderApp(App):
 
 if __name__ == '__main__':
     Config.set('graphics', 'width', '500')
-    Config.set('graphics', 'height', '170')
+    Config.set('graphics', 'height', '190')
     Config.set('graphics', 'resizable', False)
     # Config.set('kivy', 'log_level', 'error')
     # Config.set('kivy', 'log_enable', 0)
