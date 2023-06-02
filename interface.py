@@ -43,6 +43,13 @@ class MainLayout(BoxLayout):
     def download(self, username, playlist, destination=f"{expanduser('~')}/Music/"):
         paths = dl.get_music_paths(username, playlist)
 
+        if None in paths:
+            paths = [path for path in paths if path != None]
+            error = "Some music URLs weren't found\n" + \
+                    "This can be due a poor wifi connection"
+            
+            Clock.schedule_once(lambda dt: self.throw_popup(error), -1)
+        
         if type(paths) == str:
             Clock.schedule_once(lambda dt: self.throw_popup(paths), -1)
         else:

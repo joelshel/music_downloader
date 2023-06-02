@@ -79,7 +79,7 @@ def get_spotify_data(username, playlist_name):
     return music_dict
 
 
-def get_music_path(music_data):
+def get_music_path(music_data, count=0):
     yt_search_url="https://www.youtube.com/results?"
     i = music_data[0]
     music = music_data[1][0]
@@ -87,9 +87,14 @@ def get_music_path(music_data):
     
     search_term = music + " " + " ".join(artists)
     params = {"search_query": search_term}
-    result = r.get(yt_search_url, params)
+    try:
+        result = r.get(yt_search_url, params, timeout=(3, 15))
+    except r.Timeout:
+        if count >= 3:
+            return None
+        get_music_path(music_data, count + 1)
     
-    #* regex to match /watch?v= and any 11 caracters after that
+    #* regex to match /watch?v= and the next 11 characters
     path = re.search("/watch\?v=.{11}", result.text).group()
     return path
 
