@@ -4,9 +4,14 @@ from functools import partial
 from multiprocessing import Pool
 from os.path import expanduser
 import threading
+
+from os import environ
+environ["KIVY_NO_CONSOLELOG"] = "1"
+
+from kivy.config import Config
 from kivy.app import App
 from kivy.clock import Clock
-from kivy.config import Config
+from kivy.logger import Logger, LOG_LEVELS
 from kivy.properties import StringProperty, NumericProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.popup import Popup
@@ -31,7 +36,8 @@ class Error(Popup):
 
 class MainLayout(BoxLayout):
     max = NumericProperty(0)
-    value = NumericProperty(0)
+    value = NumericProperty(-1)
+    text = StringProperty("0/0")
 
     def thread_download(self, username, playlist, destination=f"{expanduser('~')}/Music/"):
         if threading.active_count() < 2:
@@ -41,6 +47,7 @@ class MainLayout(BoxLayout):
                 ).start()
 
     def download(self, username, playlist, destination=f"{expanduser('~')}/Music/"):
+        self.text = "Getting playlist info..."
         paths = dl.get_music_paths(username, playlist)
 
         if None in paths:
@@ -54,8 +61,9 @@ class MainLayout(BoxLayout):
             Clock.schedule_once(lambda dt: self.throw_popup(paths), -1)
         else:
             destination += playlist + "/"
-            self.value = 0
             self.max = len(paths)
+            self.value = 0
+
             with Pool(10) as p:
                 for downloaded_music in p.imap(
                     partial(
@@ -69,7 +77,10 @@ class MainLayout(BoxLayout):
     
     def throw_popup(self, error):
             popup = Error(text=error)
-            popup.open()   
+            popup.open()
+    
+    def on_value(self, instance, value):
+        self.text = f"{self.value}/{self.max}"
 
 
 class MusicDownloaderApp(App):
@@ -80,6 +91,4 @@ if __name__ == '__main__':
     Config.set('graphics', 'width', '500')
     Config.set('graphics', 'height', '190')
     Config.set('graphics', 'resizable', False)
-    # Config.set('kivy', 'log_level', 'error')
-    # Config.set('kivy', 'log_enable', 0)
     MusicDownloaderApp().run()
