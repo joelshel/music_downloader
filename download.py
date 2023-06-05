@@ -108,6 +108,7 @@ def download_music(path, playlist, destination=f"{expanduser('~')}/Music/", coun
         'outtmpl': f'{destination}%(title)s.%(ext)s',
         'download_archive': f'{destination}downloaded_songs_{playlist}.txt',
         'cachedir': False,
+        'socket_timeout': 10
     }
 
     try:
@@ -117,6 +118,8 @@ def download_music(path, playlist, destination=f"{expanduser('~')}/Music/", coun
         if isfile(COOKIES):
             remove(COOKIES)
     except yt_dlp.utils.DownloadError:
+        pass
+    except TimeoutError:
         pass
     else:
         return
