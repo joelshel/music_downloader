@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from functools import partial
-from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool
 from os.path import expanduser
 import threading
 
@@ -11,7 +11,6 @@ environ["KIVY_NO_CONSOLELOG"] = "1"
 from kivy.config import Config
 from kivy.app import App
 from kivy.clock import Clock
-from kivy.logger import Logger, LOG_LEVELS
 from kivy.properties import StringProperty, NumericProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.popup import Popup
@@ -43,7 +42,7 @@ class MainLayout(BoxLayout):
         if threading.active_count() < 2:
             threading.Thread(target=self.download,
                 args=(username, playlist, destination),
-                # daemon=True
+                daemon=True
                 ).start()
 
     def download(self, username, playlist, destination=f"{expanduser('~')}/Music/"):
@@ -64,7 +63,10 @@ class MainLayout(BoxLayout):
             self.max = len(paths)
             self.value = 0
 
-            with Pool(10) as p:
+            #? using ThreadPool instead of Pool so it's possible to kill the
+            #? app during execution. Sometimes the message "Segmentation fault
+            #? (core dumped)" due trying to write musics without permission
+            with ThreadPool(10) as p:
                 for downloaded_music in p.imap(
                     partial(
                         download,

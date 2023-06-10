@@ -3,10 +3,11 @@
 from functools import partial
 import http
 import json
-from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool
 from os.path import isdir, isfile, expanduser
 from os import listdir, mkdir, remove
 import re
+from urllib3.util.retry import Retry
 import requests as r
 import spotipy as sp
 from spotipy.oauth2 import SpotifyClientCredentials as SCC
@@ -87,12 +88,19 @@ def get_music_path(music_data, count=0):
     
     search_term = music + " " + " ".join(artists)
     params = {"search_query": search_term}
+    
+    session = r.Session()
+    retry = Retry(connect=3, backoff_factor=0.5)
+    adapter = r.adapters.HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    
     try:
-        result = r.get(yt_search_url, params, timeout=(3, 15))
-    except r.Timeout:
+        result = session.get(yt_search_url, params=params, timeout=(3, 15))
+    except r.Timeout: # r.exceptions.SSLError
         if count >= 3:
             return None
-        get_music_path(music_data, count + 1)
+        return get_music_path(music_data, count + 1)
     
     #* regex to match /watch?v= and the next 11 characters
     path = re.search("/watch\?v=.{11}", result.text).group()
@@ -100,6 +108,7 @@ def get_music_path(music_data, count=0):
 
 
 def download_music(path, playlist, destination=f"{expanduser('~')}/Music/", count=0):
+    # socket timeout is not enough needs another kind of timeout
     yt_url="https://www.youtube.com"
     
     ydl_opts = {
@@ -115,11 +124,8 @@ def download_music(path, playlist, destination=f"{expanduser('~')}/Music/", coun
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([yt_url + path])
     except http.cookiejar.LoadError:
-        if isfile(COOKIES):
-            remove(COOKIES)
-    except yt_dlp.utils.DownloadError:
-        pass
-    except TimeoutError:
+        remove_cookies()
+    except (yt_dlp.utils.DownloadError, TimeoutError, FileNotFoundError):
         pass
     else:
         return
@@ -127,6 +133,16 @@ def download_music(path, playlist, destination=f"{expanduser('~')}/Music/", coun
     if count >= 3:
         return
     download_music(path, playlist, destination, count+1)
+
+
+#* Function created because it is possible to enter the if statement with the
+#* file existing and tries to remove without it exists due to multiprocessing
+def remove_cookies():
+    try:
+        if isfile(COOKIES):
+            remove(COOKIES)
+    except FileNotFoundError:
+        pass
 
 
 def create_m3u(playlist_path):
@@ -149,7 +165,7 @@ def get_music_paths(username, playlist):
     elif spotify_data == 2:
         return "Playlist not found"
 
-    with Pool(50) as p:
+    with ThreadPool(50) as p:
         paths = list(p.map(get_music_path, spotify_data.items()))
 
     return paths
@@ -161,7 +177,7 @@ def download(paths, playlist, destination=f"{expanduser('~')}/Music/"):
     if not isdir(destination):
         mkdir(destination)
     
-    with Pool(10) as p:
+    with ThreadPool(10) as p:
         p.map(partial(download_music, playlist=playlist, destination=destination), paths)
     
     create_m3u(destination)
