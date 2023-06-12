@@ -125,8 +125,8 @@ def download_music(path, playlist, destination=f"{expanduser('~')}/Music/", coun
             ydl.download([yt_url + path])
     except http.cookiejar.LoadError:
         remove_cookies()
-    except (yt_dlp.utils.DownloadError, TimeoutError, FileNotFoundError):
-        pass
+    except (yt_dlp.DownloadError, TimeoutError, FileNotFoundError) as e:
+        print(e)
     else:
         return
     
