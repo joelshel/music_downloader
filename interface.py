@@ -13,6 +13,10 @@ from os import environ
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.config import Config
+Config.set('graphics', 'width', '500')
+Config.set('graphics', 'height', '190')
+Config.set('graphics', 'resizable', False)
+from kivy.core.window import Window
 from kivy.properties import StringProperty, NumericProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.popup import Popup
@@ -140,11 +144,32 @@ class MainLayout(BoxLayout):
 
 
 class MusicDownloaderApp(App):
-    pass
+    def __init__(self, **kwargs):
+        super(MusicDownloaderApp, self).__init__(**kwargs)
+
+    def build(self, **kwargs):
+        Window.bind(on_key_down=self.on_key_down)
+        self.main = MainLayout()
+        return self.main
+    
+    def on_key_down(self, keyboard, keycode, code2, text, modifiers):
+        # "Enable" CTRL + BACKSPACE
+        if "ctrl" in modifiers and keycode == 8:
+            while True:
+                if self.main.ids.username.focus:
+                    cc, line = self.do_backspace("username")
+                if self.main.ids.playlist.focus:
+                    cc, line = self.do_backspace("playlist")
+                if cc == 0 or line[cc-1] == ' ':
+                    break
+            return True
+
+    def do_backspace(self, id):
+        self.main.ids[id].do_backspace()
+        cc, cr = self.main.ids[id].cursor
+        line = self.main.ids[id]._lines[cr]
+        return cc, line
 
 
 if __name__ == '__main__':
-    Config.set('graphics', 'width', '500')
-    Config.set('graphics', 'height', '190')
-    Config.set('graphics', 'resizable', False)
     MusicDownloaderApp().run()
