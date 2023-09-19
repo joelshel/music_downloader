@@ -69,9 +69,9 @@ class MainLayout(BoxLayout):
         update.start()
 
         paths = dl.get_music_paths(username, playlist)
-        getting_playlist_queue.put("All playlist data got")
+        text_queue.put("All playlist data got")
         update.join()
-        del getting_playlist_queue
+        del text_queue
 
         if type(paths) is list:
             if None in paths:
