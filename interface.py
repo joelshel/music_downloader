@@ -153,8 +153,8 @@ class MusicDownloaderApp(App):
         return self.main
     
     def on_key_down(self, keyboard, keycode, code2, text, modifiers):
-        # "Enable" CTRL + BACKSPACE
-        if "ctrl" in modifiers and keycode == 8:
+        # Allow the use of CTRL + BACKSPACE
+        if "ctrl" in modifiers and keycode == 8 and "shift" not in modifiers:
             while True:
                 if self.main.ids.username.focus:
                     cc, line = self.do_backspace("username")
@@ -163,6 +163,21 @@ class MusicDownloaderApp(App):
                 if cc == 0 or line[cc-1] == ' ':
                     break
             return True
+        
+        # Allow the use of TAB to switch between widgets
+        if keycode == 9 and "ctrl" not in modifiers:
+            if "shift" in modifiers and self.main.ids.username.focus:
+                self.main.ids.download.focus = True
+                return True
+            elif "shift" in modifiers and self.main.ids.playlist.focus:
+                self.main.ids.username.focus = True
+                return True
+            elif self.main.ids.username.focus:
+                self.main.ids.playlist.focus = True
+                return True
+            elif self.main.ids.playlist.focus:
+                self.main.ids.download.focus = True
+                return True
 
     def do_backspace(self, id):
         self.main.ids[id].do_backspace()
