@@ -36,6 +36,7 @@ MainLayout:
     background_color: text_color
     foreground_color: hex('#015958')
     selection_color: hex('#0FC2C077')
+    text_validate_unfocus: False
 
 
 <MainLayout>:
@@ -105,5 +106,6 @@ MainLayout:
             size_hint: None, None
             height: "33dp"
             width: "120dp"
+            focus: True
             on_release:
                 root.dismiss()

@@ -155,39 +155,51 @@ class MusicDownloaderApp(App):
     def build(self, **kwargs):
         Window.bind(on_key_down=self.on_key_down)
         self.main = MainLayout()
+        self.username = self.main.ids.username
+        self.playlist = self.main.ids.playlist
+        self.download = self.main.ids.download
         return self.main
     
     def on_key_down(self, keyboard, keycode, code2, text, modifiers):
         # Allow the use of CTRL + BACKSPACE
         if "ctrl" in modifiers and keycode == 8 and "shift" not in modifiers:
             while True:
-                if self.main.ids.username.focus:
-                    cc, line = self.do_backspace("username")
-                if self.main.ids.playlist.focus:
-                    cc, line = self.do_backspace("playlist")
+                if self.username.focus:
+                    cc, line = self.do_backspace(self.username)
+                if self.playlist.focus:
+                    cc, line = self.do_backspace(self.playlist)
                 if cc == 0 or line[cc-1] == ' ':
                     break
             return True
         
         # Allow the use of TAB to switch between widgets
         if keycode == 9 and "ctrl" not in modifiers:
-            if "shift" in modifiers and self.main.ids.username.focus:
-                self.main.ids.download.focus = True
+            if "shift" in modifiers and self.username.focus:
+                self.download.focus = True
                 return True
-            elif "shift" in modifiers and self.main.ids.playlist.focus:
-                self.main.ids.username.focus = True
+            elif "shift" in modifiers and self.playlist.focus:
+                self.username.focus = True
                 return True
-            elif self.main.ids.username.focus:
-                self.main.ids.playlist.focus = True
+            elif self.username.focus:
+                self.playlist.focus = True
                 return True
-            elif self.main.ids.playlist.focus:
-                self.main.ids.download.focus = True
+            elif self.playlist.focus:
+                self.download.focus = True
+                return True
+            elif not self.username.focus and not self.playlist.focus \
+                and not self.download.focus:
+                self.username.focus = True
                 return True
 
-    def do_backspace(self, id):
-        self.main.ids[id].do_backspace()
-        cc, cr = self.main.ids[id].cursor
-        line = self.main.ids[id]._lines[cr]
+        # Allow the use of ENTER to execute the download
+        if keycode == 13:
+            self.download.trigger_action()
+            return
+
+    def do_backspace(self, textinput):
+        textinput.do_backspace()
+        cc, cr = textinput.cursor
+        line = textinput._lines[cr]
         return cc, line
 
 
