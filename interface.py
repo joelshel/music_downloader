@@ -39,7 +39,9 @@ class Error(Popup):
 
 class MainLayout(BoxLayout):
     max = NumericProperty(0)
-    value = NumericProperty(0)
+    #* self.value has to be -1 to let the self.text propriety update
+    #* in the on_value method
+    value = NumericProperty(-1)
     text = StringProperty("0/0")
 
     def thread_download(self, username, playlist):
@@ -122,6 +124,9 @@ class MainLayout(BoxLayout):
         if ticket.type == "Update text":
             self.text = ticket.value
         if ticket.type == "Update value":
+            #* Makes sure that text also updates when resetting self.value
+            if self.value == 0 and ticket.value == 0:
+                self.value = -1
             self.value = ticket.value
         if ticket.type == "Update max":
             self.max  = ticket.value
