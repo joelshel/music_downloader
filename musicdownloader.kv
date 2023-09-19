@@ -102,10 +102,12 @@ MainLayout:
             color: text_color
             halign: "center"
         FocusButton:
+            id: error
             text: 'Close'
             size_hint: None, None
             height: "33dp"
             width: "120dp"
             focus: True
             on_release:
+                app.root.ids.download.disabled = False
                 root.dismiss()

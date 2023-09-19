@@ -34,7 +34,13 @@ class Error(Popup):
 
     def __init__(self, text, **kwargs):
         super().__init__(**kwargs)
+        Window.bind(on_key_down=self.on_key_down)
         self.text = text
+    
+    def on_key_down(self, keyboard, keycode, code2, text, modifiers):
+        if keycode == 13:
+            self.ids.error.trigger_action()
+            return
 
 
 class MainLayout(BoxLayout):
@@ -85,6 +91,10 @@ class MainLayout(BoxLayout):
         
         if type(paths) == str:
             Clock.schedule_once(lambda dt: self.throw_popup(paths), -1)
+            
+            self.queue.put(Ticket("Disable button"))
+            Clock.schedule_once(lambda dt: self.check_queue(), -1)
+            
             self.queue.put(Ticket("Update text", "0/0"))
             Clock.schedule_once(lambda dt: self.check_queue(), -1)
         else:
@@ -130,6 +140,8 @@ class MainLayout(BoxLayout):
             self.value = ticket.value
         if ticket.type == "Update max":
             self.max  = ticket.value
+        if ticket.type == "Disable button":
+            self.ids.download.disabled = True
 
     def auto_update_text(self, text_queue):
         while True:
@@ -192,7 +204,7 @@ class MusicDownloaderApp(App):
                 return True
 
         # Allow the use of ENTER to execute the download
-        if keycode == 13:
+        if keycode == 13 and not self.download.disabled:
             self.download.trigger_action()
             return
 
