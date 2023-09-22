@@ -19,7 +19,10 @@ Config.set('graphics', 'resizable', False)
 from kivy.core.window import Window
 from kivy.properties import StringProperty, NumericProperty
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.behaviors import FocusBehavior
 from kivy.uix.popup import Popup
+from kivy.utils import get_color_from_hex as hex
 import download as dl
 
 
@@ -27,6 +30,52 @@ class Ticket():
     def __init__(self, type:str, value=None):
         self.type = type
         self.value = value
+
+
+class FocusButton(Button, FocusBehavior):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.button_color = hex('#008F8C')
+        self.pressed_color = hex('#A6A3A8')
+        self.hover_color = hex("#00DBD8")
+        self.is_hover = False
+
+        # bind button with these instead of the traditional
+        # on_press and on_release methods
+        # These methods are basically changing the color of
+        # the button depending of its state, focus, or if
+        # the mouse is hover it or not
+        Window.bind(mouse_pos=self.on_mouse_pos)
+        self.bind(on_state=self.on_state)
+        self.bind(on_focus=self.on_focus)
+    
+    def on_mouse_pos(self, window, mouse_pos):
+        # Check if the mouse it hover the button or not
+        self.is_hover = self.collide_point(*mouse_pos)
+
+        if (self.is_hover or self.focus) and self.state == "normal":
+            self.background_color = self.hover_color
+        elif self.state == "normal": # no need for is_hover and focus
+            self.background_color = self.button_color
+        else:
+            self.background_color = self.pressed_color
+        
+
+    def on_state(self, button, state):
+        if state == "down":
+            self.background_color = self.pressed_color
+        elif state == "normal" and (self.is_hover or self.focus):
+            self.background_color = self.hover_color
+        else:
+            self.background_color = self.button_color
+    
+    def on_focus(self, button, has_focus):
+        if (has_focus or self.is_hover) and self.state == "normal":
+            self.background_color = self.hover_color
+        elif not has_focus and not self.is_hover and self.state == "normal":
+            self.background_color = self.button_color
+        else:
+            self.background_color = self.pressed_color
 
 
 class Error(Popup):

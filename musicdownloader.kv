@@ -5,20 +5,14 @@
 #:set letter_size 20
 #:set text_color hex('#B2F6FF')
 #:set bg_color hex('#023535')
-#:set button_color hex('#008F8C')
-#:set pressed_color hex('#A6A3A8')
 
 MainLayout:
 
-<FocusButton@Button+FocusBehavior>:
+<FocusButton>:
     pos_hint: {"center_x":.5, "center_y":.5}
     font_size: letter_size
     color: text_color
-    background_color: button_color
-    on_press:
-        self.background_color = pressed_color
-    on_release:
-        self.background_color = button_color;
+    background_color: self.button_color
 
 
 <TextLabel@Label>:
@@ -107,7 +101,6 @@ MainLayout:
             size_hint: None, None
             height: "33dp"
             width: "120dp"
-            focus: True
             on_release:
                 app.root.ids.download.disabled = False
                 root.dismiss()
