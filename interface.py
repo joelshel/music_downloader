@@ -16,6 +16,7 @@ from kivy.config import Config
 Config.set('graphics', 'width', '500')
 Config.set('graphics', 'height', '190')
 Config.set('graphics', 'resizable', False)
+Config.set('kivy', 'exit_on_escape', '0')
 from kivy.core.window import Window
 from kivy.properties import StringProperty, NumericProperty
 from kivy.uix.boxlayout import BoxLayout
@@ -60,7 +61,6 @@ class FocusButton(Button, FocusBehavior):
         else:
             self.background_color = self.pressed_color
         
-
     def on_state(self, button, state):
         if state == "down":
             self.background_color = self.pressed_color
