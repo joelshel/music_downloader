@@ -103,4 +103,9 @@ MainLayout:
             width: "120dp"
             on_release:
                 app.root.ids.download.disabled = False
+                #* Trick to make sure when the download button is focused
+                #* and the popup is open at same time the download button
+                #* loses focus closing the popup
+                app.root.ids.download.focus = True
+                app.root.ids.download.focus = False
                 root.dismiss()
