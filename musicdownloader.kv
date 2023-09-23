@@ -31,6 +31,7 @@ MainLayout:
     foreground_color: hex('#015958')
     selection_color: hex('#0FC2C077')
     text_validate_unfocus: False
+    write_tab: False
 
 
 <MainLayout>:
@@ -51,10 +52,14 @@ MainLayout:
         TextInput:
             id: username
             focus: True
+            focus_next: playlist
+            focus_previous: download
         TextLabel:
             text: "playlist:"
         TextInput:
             id: playlist
+            focus_next: download
+            focus_previous: username
     FocusButton:
         id: download
         text: "download"
@@ -103,9 +108,4 @@ MainLayout:
             width: "120dp"
             on_release:
                 app.root.ids.download.disabled = False
-                #* Trick to make sure when the download button is focused
-                #* and the popup is open at same time the download button
-                #* loses focus closing the popup
-                app.root.ids.download.focus = True
-                app.root.ids.download.focus = False
                 root.dismiss()

@@ -232,23 +232,14 @@ class MusicDownloaderApp(App):
                 if cc == 0 or line[cc-1] == ' ':
                     break
             return True
-        
-        # Allow the use of TAB to switch between widgets
+
+        # Verify if there is any item with focus
+        any_focus = list(filter(lambda id: self.main.ids[id].focus, self.main.ids))
+
+        # If there isn't any widget in focus then focus in the first widget
+        # when presses TAB
         if keycode == 9 and "ctrl" not in modifiers:
-            if "shift" in modifiers and self.username.focus:
-                self.download.focus = True
-                return True
-            elif "shift" in modifiers and self.playlist.focus:
-                self.username.focus = True
-                return True
-            elif self.username.focus:
-                self.playlist.focus = True
-                return True
-            elif self.playlist.focus:
-                self.download.focus = True
-                return True
-            elif not self.username.focus and not self.playlist.focus \
-                and not self.download.focus:
+            if not any_focus:
                 self.username.focus = True
                 return True
 
