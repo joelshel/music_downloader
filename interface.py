@@ -78,7 +78,7 @@ class FocusButton(Button, FocusBehavior):
             self.background_color = self.pressed_color
 
 
-class Error(Popup):
+class Error(Popup, FocusBehavior):
     text = StringProperty("")
 
     def __init__(self, text, **kwargs):
@@ -171,8 +171,8 @@ class MainLayout(BoxLayout):
             dl.create_m3u(destination)
     
     def throw_popup(self, error):
-            popup = Error(text=error)
-            popup.open()
+            self.popup = Error(text=error)
+            self.popup.open()
     
     def on_value(self, instance, value):
         self.text = f"{self.value}/{self.max}"
@@ -239,7 +239,12 @@ class MusicDownloaderApp(App):
         # If there isn't any widget in focus then focus in the first widget
         # when presses TAB
         if keycode == 9 and "ctrl" not in modifiers:
-            if not any_focus:
+            if self.has_popup():
+                # Check if there's any focus in the popup
+                if not (self.main.popup.focus or self.main.popup.ids.error.focus):
+                    self.main.popup.ids.error.focus = True
+                    return True
+            elif not any_focus:
                 self.username.focus = True
                 return True
 
@@ -247,6 +252,13 @@ class MusicDownloaderApp(App):
         if keycode == 13 and not self.download.disabled:
             self.download.trigger_action()
             return
+    
+    def has_popup(self):
+        try:
+            self.main.popup
+            return True
+        except AttributeError:
+            return False
 
     def do_backspace(self, textinput):
         textinput.do_backspace()

@@ -91,6 +91,11 @@ MainLayout:
     background_color: bg_color
     title_color: text_color
     title_size: letter_size
+    on_dismiss:
+        del app.root.popup
+        app.root.ids.username.focus = True
+    focus_next: error
+    focus_previous: error
     BoxLayout:
         orientation: "vertical"
         padding: "6dp"
@@ -109,3 +114,5 @@ MainLayout:
             on_release:
                 app.root.ids.download.disabled = False
                 root.dismiss()
+            focus_next: root
+            focus_previous: root
