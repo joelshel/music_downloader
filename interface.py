@@ -252,6 +252,10 @@ class MusicDownloaderApp(App):
         if keycode == 13 and not self.download.disabled:
             self.download.trigger_action()
             return
+
+        if "ctrl" in modifiers and "shift" not in modifiers and keycode == 119:
+            self.stop()
+            return True
     
     def has_popup(self):
         try:
