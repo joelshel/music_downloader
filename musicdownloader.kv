@@ -1,12 +1,17 @@
 #:kivy 2.1.0
 
 #:import hex kivy.utils.get_color_from_hex
+#: import font font.font
 
 #:set letter_size 20
 #:set text_color hex('#B2F6FF')
 #:set bg_color hex('#023535')
 
 MainLayout:
+
+<Widget>:
+    font_name: font
+
 
 <FocusButton>:
     pos_hint: {"center_x":.5, "center_y":.5}
@@ -26,10 +31,17 @@ MainLayout:
     size_hint: .8, None
     height: "36dp"
     font_size: letter_size
+    #! There's a bug that changes the line heigth from 20 to 21 when 
+    #! some letters are typed. For example the letter "y"
+    #! This happens with the font FreeSans but for example it doesn't
+    #! happen with the font Roboto if the padding is removed
+    #! probably a kivy problem
+    padding: (7, 7)
     pos_hint: {"center_x":.5, "center_y":.5}
     background_color: text_color
     foreground_color: hex('#015958')
     selection_color: hex('#0FC2C077')
+    hint_text_color: hex('#02CCC9')
     text_validate_unfocus: False
     write_tab: False
 
@@ -54,12 +66,14 @@ MainLayout:
             focus: True
             focus_next: playlist
             focus_previous: download
+            hint_text: "Enter username"
         TextLabel:
             text: "playlist:"
         TextInput:
             id: playlist
             focus_next: download
             focus_previous: username
+            hint_text: "Enter playlist"
     FocusButton:
         id: download
         text: "download"
